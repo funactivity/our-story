@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Our Love Story ❤️</title>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Indie+Flower&family=Playfair+Display:ital@1&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --romantic-red: #b22234;
+      --paper-white: #fff8f8;
+      --highlight-pink: #ffe6e6;
+    }
+
+    .gif-dog {
+      position: fixed; /* Keeps it in one spot even when you scroll */
+      z-index: 100;    /* Ensures it stays on top of your background */
+      width: 120px;    /* Adjust size here */
+      pointer-events: none; /* Allows you to click "through" it to buttons underneath */
+      bottom: 100px;    /* Distance from the bottom edge */
+      left: 20px;     /* Distance from the right edge */
+      /* Optional: Add a slight tilt to make it look like a real sticker */
+      transform: rotate(-10deg); 
+    }
+
+    .gif-jump {
+      position: fixed; /* Keeps it in one spot even when you scroll */
+      z-index: 100;    /* Ensures it stays on top of your background */
+      width: 120px;    /* Adjust size here */
+      pointer-events: none; /* Allows you to click "through" it to buttons underneath */
+      bottom: 100px;    /* Distance from the bottom edge */
+      right: 20px;     /* Distance from the right edge */
+      /* Optional: Add a slight tilt to make it look like a real sticker */
+      transform: rotate(-10deg); 
+    }
+
+
+    body {
+      background: #f5ecdd url('https://www.transparenttextures.com/patterns/old-wall.png');
+      font-family: 'Playfair Display', serif;
+      color: #3a2f2f;
+      margin: 0;
+      overflow-x: hidden;
+      cursor: url('https://cur.cursors-4u.net/symbols/sym-9/sym847.cur'), auto;
+    }
+
+    /* Scroll Animations */
+    .fade-in { opacity: 0; transform: translateY(30px); transition: all 1s ease-out; }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    header, .section-card {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 40px;
+      background: var(--paper-white);
+      border: 1px solid #d9c6c6;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      position: relative;
+    }
+
+    /* Polaroid Framing */
+    .gallery { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 20px; }
+    .polaroid {
+      background: white;
+      padding: 15px 15px 40px 15px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transform: rotate(-2deg);
+      transition: transform 0.3s;
+      width: 200px;
+    }
+    .polaroid:nth-child(even) { transform: rotate(3deg); }
+    .polaroid:hover { transform: scale(1.05) rotate(0deg); z-index: 10; }
+    .polaroid img { width: 100%; height: 200px; object-fit: cover; }
+    .caption { font-family: 'Indie Flower', cursive; text-align: center; margin-top: 10px; }
+
+    /* Timer & UI */
+    #timer { text-align: center; font-family: 'Dancing Script', cursive; font-size: 1.8rem; color: var(--romantic-red); }
+
+    /* Calendar Styles */
+    .calendar-container { padding: 10px; }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+    .calendar-day { 
+      min-height: 80px; border: 1px solid #eee; padding: 5px; background: white; 
+      font-size: 0.8rem; cursor: pointer; position: relative;
+    }
+    .calendar-day:hover { background: #fdfcf0; }
+    .calendar-day.today { border: 2px solid var(--romantic-red); }
+    .calendar-day.has-event { background: var(--highlight-pink); }
+    .day-number { font-weight: bold; margin-bottom: 5px; display: block; }
+    .event-tag { 
+      font-size: 0.65rem; background: var(--romantic-red); color: white; 
+      padding: 2px 4px; border-radius: 3px; display: block; margin-top: 2px;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+
+    /* Modals */
+    .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.7); animation: fadeIn 0.3s ease; }
+    .modal-content { background: var(--paper-white); margin: 5% auto; padding: 40px; border: 2px solid var(--romantic-red); width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; border-radius: 10px; position: relative; animation: slideDown 0.4s ease; }
+    .close-btn { position: absolute; top: 15px; right: 20px; font-size: 30px; cursor: pointer; }
+
+    /* Floating UI Buttons */
+    .floating-ui { position: fixed; bottom: 20px; z-index: 1000; cursor: pointer; font-size: 2rem; background: white; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s; }
+    #note-toggle { left: 20px; }
+    #calendar-toggle { left: 85px; }
+    #music-toggle { right: 20px; }
+
+    /* Other Utilities */
+    #scratch-container { position: relative; width: 300px; height: 100px; margin: 20px auto; touch-action: none; }
+    #scratch-reveal { position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #ffe6e6; color: var(--romantic-red); font-family: 'Indie Flower', cursive; font-size: 1.5rem; }
+    #scratch-canvas { position: absolute; top: 0; left: 0; z-index: 2; cursor: crosshair; }
+    .diary-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    #diary-area { width: 100%; height: 200px; background: #fdfcf0; border: 1px dashed var(--romantic-red); font-family: 'Indie Flower', cursive; font-size: 1.2rem; padding: 15px; box-sizing: border-box; border-radius: 5px; resize: vertical; }
+    .ask-box { text-align: center; margin-top: 30px; }
+    .btn-group { display: flex; justify-content: center; gap: 20px; height: 100px; align-items: center; position: relative; }
+    #yesBtn { background: #ff4d4d; color: white; padding: 10px 30px; border: none; border-radius: 20px; cursor: pointer; font-size: 1.2rem; z-index: 10;}
+    #noBtn { background: #888; color: white; padding: 10px 30px; border: none; border-radius: 20px; cursor: pointer; transition: 0.1s; position: relative; z-index: 10; }
+    .falling-heart { position: fixed; top: -20px; font-size: 24px; animation: fall 3s linear forwards; pointer-events: none; z-index: 999; }
+    @keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
+    .petal { position: fixed; font-size: 18px; pointer-events: none; animation: fallPetal 3s linear forwards; z-index: 999; }
+    @keyframes fallPetal { to { transform: translateY(50vh) rotate(90deg); opacity: 0; } }
+    .success-overlay { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-family: 'Dancing Script', cursive; font-size: 4rem; color: var(--romantic-red); text-align: center; z-index: 10001; pointer-events: none; opacity: 0; text-shadow: 2px 2px 10px rgba(0,0,0,0.1); }
+    .fade-out-text { animation: fadeInOut 3s ease-in-out forwards; }
+    @keyframes fadeInOut { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.1); } }
+  </style>
+</head>
+<body>
+
+  <img src="https://media.tenor.com/quUDUGArZDYAAAAi/kawaii-cute.gif" class="gif-dog">
+  <img src="https://media.tenor.com/A3wMnpdNcyAAAAAi/cupid-arrow.gif" class="gif-jump">
+
+<audio id="bg-music" loop><source src="music.mp4" type="audio/mpeg"></audio>
+
+<div id="yes-message" class="success-overlay">I KNEW YOUD SAY YES</div>
+
+<header class="fade-in">
+  <h1 style="font-family: 'Dancing Script', cursive; color: var(--romantic-red); font-size: 3.5rem; text-align:center;">Happy Valentine's Day</h1>
+  <div id="timer">Counting our moments...</div>
+</header>
+
+<section class="section-card fade-in">
+  <h2 style="font-family: 'Dancing Script', cursive; text-align: center;">Chapter 1: Our Journey</h2>
+  <div class="gallery">
+    <div class="polaroid"><img src="pics/photo1.jpg" alt="Photo 1"><div class="caption">A special day</div></div>
+    <div class="polaroid"><img src="pics/photo2.jpg" alt="Photo 2"><div class="caption">Where it started</div></div>
+    <div class="polaroid"><img src="pics/photo3.jpg" alt="Photo 3"><div class="caption">My whole heart</div></div>
+  </div>
+</section>
+
+<section class="section-card fade-in">
+  <h2 style="font-family: 'Dancing Script', cursive; text-align: center;">Chapter 2: Why You're Amazing</h2>
+  <div style="text-align: center;">
+    <p id="reason-text" style="font-family: 'Indie Flower', cursive; font-size: 1.8rem;">Click the heart for a reason I love you...</p>
+    <button onclick="generateReason()" style="background: none; border: none; font-size: 3rem; cursor: pointer;">❤️</button>
+  </div>
+</section>
+
+<section class="section-card fade-in">
+  <h2 style="font-family: 'Dancing Script', cursive; text-align: center;">A Secret Message</h2>
+  <div id="scratch-container">
+    <div id="scratch-reveal">You're my greatest adventure! ✨</div>
+    <canvas id="scratch-canvas" width="300" height="100"></canvas>
+  </div>
+  <div class="ask-box">
+    <h3>Will you Love me forever?</h3>
+    <div class="btn-group">
+      <button id="yesBtn" onclick="celebrate()">YES</button>
+      <button id="noBtn">NO</button>
+    </div>
+  </div>
+</section>
+
+<section class="section-card fade-in">
+  <h2 style="font-family: 'Dancing Script', cursive; text-align: center;">Chapter 3: Our Continuing Story</h2>
+  <textarea id="diary-area" placeholder="Write down a memory..."></textarea>
+  <div class="save-status" id="save-status" style="text-align: right; font-size: 0.8rem; color: #888;">Saved for us ❤️</div>
+</section>
+
+<div id="calendarModal" class="modal">
+  <div class="modal-content" style="max-width: 800px;">
+    <span class="close-btn" onclick="closeCalModal()">&times;</span>
+    <h2 style="font-family: 'Dancing Script', cursive; color: var(--romantic-red); text-align: center;">Our Special Dates 📅</h2>
+    <div class="calendar-header">
+      <button onclick="changeMonth(-1)">❮</button>
+      <h3 id="monthDisplay" style="font-family: 'Indie Flower', cursive;">Month Year</h3>
+      <button onclick="changeMonth(1)">❯</button>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </div>
+</div>
+
+<div id="letterModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal()">&times;</span>
+    <h2 style="font-family: 'Dancing Script', cursive; color: var(--romantic-red);">My Love Letter to You 💕</h2>
+    <p style="font-family: 'Indie Flower', cursive;">My Dearest [Her Name],</p>
+    <p style="font-family: 'Indie Flower', cursive;">[Your letter here...]</p>
+  </div>
+</div>
+
+<div id="note-toggle" class="floating-ui">💌</div>
+<div id="calendar-toggle" class="floating-ui">📅</div>
+<div id="music-toggle" class="floating-ui">🎵</div>
+
+<script>
+  // 1. Timer Logic
+  const startDate = new Date("May 15, 2023 00:00:00").getTime();
+  function updateTimer() {
+    const diff = new Date().getTime() - startDate;
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    document.getElementById("timer").innerHTML = `We've loved each other for ${days} days and ${hours} hours.`;
+  }
+  setInterval(updateTimer, 1000);
+  updateTimer();
+
+  // 2. Calendar Logic
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  
+  // Recurring events (format: MM-DD)
+  const specialEvents = [
+    { date: "05-15", title: "The Day We Met ❤️", recurring: true },
+    { date: "02-14", title: "Valentine's Day 💕", recurring: true },
+    { date: "05-17", title: "Second day we met", recurring: true },
+    { date: "06-24", title: "Our first day out", recurring: true },
+    { date: "08-12", title: "First I Love You", recurring: true }
+  ];
+
+  function loadEvents() {
+    return JSON.parse(localStorage.getItem('ourEvents')) || [];
+  }
+
+  function renderCalendar() {
+    const grid = document.getElementById('calendarGrid');
+    const monthYearText = document.getElementById('monthDisplay');
+    grid.innerHTML = "";
+    
+    const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    
+    monthYearText.innerText = `${monthNames[currentMonth]} ${currentYear}`;
+    
+    // Empty slots for previous month
+    for (let i = 0; i < firstDay; i++) {
+      grid.appendChild(document.createElement('div'));
+    }
+
+    const savedEvents = loadEvents();
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayDiv = document.createElement('div');
+      dayDiv.className = 'calendar-day';
+      const dateKey = `${(currentMonth+1).toString().padStart(2, '0')}-${d.toString().padStart(2, '0')}`;
+      const fullDateKey = `${currentYear}-${dateKey}`;
+      
+      dayDiv.innerHTML = `<span class="day-number">${d}</span>`;
+      
+      // Check recurring
+      specialEvents.forEach(ev => {
+        if(ev.date === dateKey) {
+          dayDiv.classList.add('has-event');
+          dayDiv.innerHTML += `<span class="event-tag">${ev.title}</span>`;
+        }
+      });
+
+      // Check one-time saved events
+      savedEvents.forEach((ev, index) => {
+        if(ev.date === fullDateKey) {
+          dayDiv.classList.add('has-event');
+          dayDiv.innerHTML += `<span class="event-tag" onclick="deleteEvent(${index}); event.stopPropagation();">${ev.title}</span>`;
+        }
+      });
+
+      dayDiv.onclick = () => {
+        const title = prompt("Add a special plan or memory for this day:");
+        if(title) {
+          const events = loadEvents();
+          events.push({ date: fullDateKey, title: title });
+          localStorage.setItem('ourEvents', JSON.stringify(events));
+          renderCalendar();
+        }
+      };
+      
+      grid.appendChild(dayDiv);
+    }
+  }
+
+  function deleteEvent(index) {
+    if(confirm("Remove this event?")) {
+      const events = loadEvents();
+      events.splice(index, 1);
+      localStorage.setItem('ourEvents', JSON.stringify(events));
+      renderCalendar();
+    }
+  }
+
+  function changeMonth(dir) {
+    currentMonth += dir;
+    if(currentMonth < 0) { currentMonth = 11; currentYear--; }
+    else if(currentMonth > 11) { currentMonth = 0; currentYear++; }
+    renderCalendar();
+  }
+
+  // Modals
+  const calModal = document.getElementById('calendarModal');
+  document.getElementById('calendar-toggle').onclick = () => { calModal.style.display = 'block'; renderCalendar(); };
+  function closeCalModal() { calModal.style.display = 'none'; }
+
+  // 3. Floating Animations
+  function createHeart() {
+    const heart = document.createElement('div');
+    heart.className = 'falling-heart'; heart.innerHTML = '❤️';
+    heart.style.left = Math.random() * 100 + 'vw';
+    heart.style.animationDuration = (Math.random() * 2 + 3) + 's';
+    document.body.appendChild(heart);
+    setTimeout(() => heart.remove(), 4000);
+  }
+  setInterval(createHeart, 400);
+
+  // 4. Diary Save
+  const diary = document.getElementById('diary-area');
+  diary.value = localStorage.getItem('ourLoveStoryText') || "";
+  diary.oninput = () => {
+    localStorage.setItem('ourLoveStoryText', diary.value);
+    document.getElementById('save-status').innerText = "Saving to your heart...";
+    setTimeout(() => { document.getElementById('save-status').innerText = "Saved for us ❤️"; }, 1000);
+  };
+
+  // 5. Reasons
+  const reasons = [
+    "The way your eyes light up when you're genuinely happy.",
+    "How you make even the most ordinary days feel like an adventure.",
+    "The sense of peace I feel the second I’m around you.",
+    "Your kindness, not just to me, but to everyone around you.",
+    "The way you believe in me even when I struggle to believe in myself.",
+    "Your laugh—it’s hands down my favorite sound in the world.",
+    "How you know exactly what I’m thinking without me saying a word.",
+    "The way you challenge me to be the best version of myself.",
+    "Your strength and the graceful way you handle everything life throws at you.",
+    "The simple fact that you’re my best friend and my soulmate all in one."
+  ];
+
+  function generateReason() {
+    const rt = document.getElementById('reason-text');
+    rt.style.opacity = 0;
+    setTimeout(() => {
+      rt.innerText = reasons[Math.floor(Math.random() * reasons.length)];
+      rt.style.opacity = 1;
+    }, 200);
+  }
+
+  // 6. Celebration
+  function celebrate() {
+    const msg = document.getElementById('yes-message');
+    msg.classList.remove('fade-out-text');
+    void msg.offsetWidth;
+    msg.classList.add('fade-out-text');
+    const kiss = document.createElement('div');
+    kiss.className = 'kiss-sticker'; kiss.innerHTML = '💋';
+    document.body.appendChild(kiss);
+    setTimeout(() => kiss.remove(), 2000);
+    for(let i=0; i<50; i++) setTimeout(createHeart, i * 50);
+  }
+
+  // 7. Rose Petal Trail
+  document.addEventListener('mousemove', (e) => {
+    if (Math.random() < 0.1) {
+      const p = document.createElement('div');
+      p.className = 'petal'; p.innerHTML = '🌹';
+      p.style.left = e.pageX + 'px'; p.style.top = e.pageY + 'px';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 3000);
+    }
+  });
+
+  // 8. Music & Modal
+  const music = document.getElementById('bg-music');
+  document.getElementById('music-toggle').onclick = () => music.paused ? music.play() : music.pause();
+  const modal = document.getElementById('letterModal');
+  document.getElementById('note-toggle').onclick = () => { modal.style.display = 'block'; };
+  function closeModal() { modal.style.display = 'none'; }
+  window.onclick = (event) => { 
+    if (event.target == modal) modal.style.display = 'none'; 
+    if (event.target == calModal) calModal.style.display = 'none';
+  };
+
+  // 9. Scratch-off
+  const canvas = document.getElementById('scratch-canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#C0C0C0'; ctx.fillRect(0, 0, 300, 100);
+  ctx.globalCompositeOperation = 'destination-out';
+  const handleScratch = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left;
+    const y = (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top;
+    ctx.beginPath(); ctx.arc(x, y, 20, 0, Math.PI * 2); ctx.fill();
+  };
+  canvas.addEventListener('mousemove', handleScratch);
+  canvas.addEventListener('touchmove', handleScratch);
+
+  const obs = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('visible')), {threshold: 0.1});
+  document.querySelectorAll('.fade-in').forEach(s => obs.observe(s));
+  
+  // Runaway button
+  const noBtn = document.getElementById('noBtn');
+  noBtn.onmouseover = () => {
+    noBtn.style.position = 'fixed';
+    const x = Math.max(50, Math.random() * (window.innerWidth - 100));
+    const y = Math.max(50, Math.random() * (window.innerHeight - 100));
+    noBtn.style.left = x + 'px'; noBtn.style.top = y + 'px';
+  };
+</script>
+</body>
+</html>
